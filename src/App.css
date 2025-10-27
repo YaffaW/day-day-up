@@ -1,42 +1,89 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
+.app {
+  background-image: url('/src/assets/bg.png');
+  background-size: cover;
+  background-position: center;
+  height: 100vh;
   text-align: center;
+  padding: 20px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.content {
+  flex: 1;
+  display: flex;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.profile-image {
+  width: 150px;
+  height: 150px;
+  border-radius: 50px;
+  object-fit: cover;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+aside {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
 
-.card {
-  padding: 2em;
+main {
+  flex: 1;
+  position: relative;
 }
 
-.read-the-docs {
-  color: #888;
+.option {
+  width: 40%;
+  position: absolute;
+}
+
+.option:nth-child(1) {
+  top: 0;
+  left: 0;
+}
+
+.option:nth-child(2) {
+  top: 0;
+  right: 0;
+}
+
+.option:nth-child(3) {
+  bottom: 0;
+  left: 20%;
+}
+
+.option-block {
+  padding-bottom: 90%;
+  position: relative;
+}
+
+.block-0 {
+  background: url('/src/assets/block-0.png') no-repeat center;
+  background-size: contain;
+}
+
+.block-0:hover {
+  background: url('/src/assets/block-0-hover.png') no-repeat center;
+  background-size: contain;
+}
+
+.block-1 {
+  background: url('/src/assets/block-1.png') no-repeat center;
+  background-size: contain;
+}
+
+.block-1:hover {
+  background: url('/src/assets/block-1-hover.png') no-repeat center;
+  background-size: contain;
+}
+
+.label {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
 }

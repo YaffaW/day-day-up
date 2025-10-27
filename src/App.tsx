@@ -1,35 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Link } from 'react-router';
+import './App.css';
+import profile from './assets/profile.jpeg';
 
 function App() {
-  const [count, setCount] = useState(0)
-
+  const options = [
+    { label: 'Schedule', URL: '/Schedule' },
+    { label: 'Projects', URL: '/Projects' },
+    { label: 'Blog', URL: '/Blog' }
+  ]
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <div className="app">
+      <header>
+        <h1>🥳 Welcome to Yaffa's website 🥳</h1>
+      </header>
+      <div className="content">
+        <aside>
+          <img src={profile} alt="Yaffa" className='profile-image' />
+          <div>
+            <h2>Yaffa</h2>
+            <p>Web Developer</p>
+            <p>Passionate about creating beautiful and functional web applications.</p>
+            <p>Contact: <a href="mailto:yaffa@example.com">yaffa@example.com</a></p>
+          </div>
+        </aside>
+        <main>
+          {
+            options.map((option, index) => (
+              <Link to={option.URL} key={index} className="option">
+                <div className={`option-block block-${index % 2}`}>
+                  <span className="label">{option.label}</span>
+                </div>
+              </Link>
+            ))
+          }
+        </main>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </div>
   )
 }
 
-export default App
+export default App;

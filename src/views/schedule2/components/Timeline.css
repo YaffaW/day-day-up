@@ -1,0 +1,25 @@
+.timeline-table-container {
+  padding: 10px;
+  overflow: auto;
+}
+
+.timeline-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.timeline-table th,
+.timeline-table td {
+  border: 1px solid #ddd;
+  text-align: center;
+}
+
+task-status {
+  display: inline-block;
+  font-size: 18px;
+}
+
+.task-status.completed {
+  color: green;
+}

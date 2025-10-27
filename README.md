@@ -1,4 +1,8 @@
 # React + TypeScript + Vite
+创建项目
+```bash
+npm create vite@latest my-app -- --template react
+```
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 

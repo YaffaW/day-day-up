@@ -1,0 +1,50 @@
+.tasks {
+  height: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  color: #FFFFFF;
+}
+
+.task-item {
+  background-color: #9dd465aa;
+  margin-right: 10px;
+  position: relative;
+  padding: 20px;
+  border-radius: 10px;
+  min-width: 200px;
+}
+
+.task-title {
+  display: flex;
+
+  .task-name {
+    flex: 1;
+  }
+}
+
+.task-des {
+  font-size: 12px;
+}
+
+.task-period {
+  margin-top: 10px;
+}
+
+.task-change {
+  padding-top: 30px;
+  text-align: center;
+  position: relative;
+
+  .button-close {
+    position: absolute;
+    top: 7px;
+    right: 14px;
+    font-size: 20px;
+    cursor: pointer;
+    color: #FFFFFF;
+  }
+
+  .title {
+    margin-bottom: 30px;
+  }
+}

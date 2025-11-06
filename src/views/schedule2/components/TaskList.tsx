@@ -5,12 +5,14 @@ import type { Task } from '../types';
 interface TaskListProps {
   tasks: Task[];
   removeTask: (taskId: string) => void;
-  toggleTaskCompletion?: (taskId: string, completed: boolean) => void;
+  toggleTaskCompletion: (taskId: string) => void;
+  updateTask: (updatedTask: Task) => void;
 }
 const TaskList = ({
   tasks,
   removeTask,
-  toggleTaskCompletion
+  toggleTaskCompletion,
+  updateTask
 }: TaskListProps) => {
   return (
     <div>
@@ -21,7 +23,8 @@ const TaskList = ({
             key={task.id}
             task={task}
             onRemove={removeTask}
-            onToggleCompletion={toggleTaskCompletion}
+            onToggleComplete={toggleTaskCompletion}
+            onUpdateTask={updateTask}
           />
         ))}
       </div>

@@ -1,17 +1,47 @@
-import { Link } from 'react-router';
+import { useState, useEffect } from 'react';
 import './App.css';
 import profile from './assets/profile.jpeg';
+import Login from './views/Login';
+import ScheduleHome from './views/schedule/Home';
+import { authApi } from './api';
 
 function App() {
-  const options = [
-    { label: 'Schedule', URL: '/Schedule' },
-    { label: 'Projects', URL: '/Projects' },
-    { label: 'Blog', URL: '/Blog' }
-  ]
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // 检查是否有有效的token
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsAuthenticated(true);
+    }
+    setCheckingAuth(false);
+  }, []);
+
+  const handleLogin = () => {
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    authApi.logout();
+    setIsAuthenticated(false);
+  };
+
+  if (checkingAuth) {
+    return <div>加载中...</div>;
+  }
+
+  if (!isAuthenticated) {
+    return <Login onLogin={handleLogin} />;
+  }
+
   return (
     <div className="app">
       <header>
-        <h1>🥳 Welcome to Yaffa's website 🥳</h1>
+        <div className="header-content">
+          <h1>🥳 Welcome to Yaffa's website 🥳</h1>
+          <button onClick={handleLogout} className="logout-button">退出</button>
+        </div>
       </header>
       <div className="content">
         <aside>
@@ -24,19 +54,11 @@ function App() {
           </div>
         </aside>
         <main>
-          {
-            options.map((option, index) => (
-              <Link to={option.URL} key={index} className="option">
-                <div className={`option-block block-${index % 2}`}>
-                  <span className="label">{option.label}</span>
-                </div>
-              </Link>
-            ))
-          }
+          <ScheduleHome />
         </main>
       </div>
     </div>
-  )
+  );
 }
 
 export default App;

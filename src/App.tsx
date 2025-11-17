@@ -4,6 +4,7 @@ import profile from './assets/profile.jpeg';
 import Login from './views/Login';
 import ScheduleHome from './views/schedule/Home';
 import { authApi } from './api';
+import { Link } from 'react-router';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -27,14 +28,19 @@ function App() {
     setIsAuthenticated(false);
   };
 
-  if (checkingAuth) {
-    return <div>加载中...</div>;
-  }
+  // if (checkingAuth) {
+  //   return <div>加载中...</div>;
+  // }
 
-  if (!isAuthenticated) {
-    return <Login onLogin={handleLogin} />;
-  }
+  // if (!isAuthenticated) {
+  //   return <Login onLogin={handleLogin} />;
+  // }
 
+  const options = [
+    { label: 'Schedule', URL: '/Schedule' },
+    { label: 'Projects', URL: '/Projects' },
+    { label: 'Blog', URL: '/Blog' }
+  ]
   return (
     <div className="app">
       <header>
@@ -54,7 +60,15 @@ function App() {
           </div>
         </aside>
         <main>
-          <ScheduleHome />
+          {
+            options.map((option, index) => (
+              <Link to={option.URL} key={index} className="option">
+                <div className={`option-block block-${index % 2}`}>
+                  <span className="label">{option.label}</span>
+                </div>
+              </Link>
+            ))
+          }
         </main>
       </div>
     </div>

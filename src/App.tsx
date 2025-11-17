@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import './App.css';
 import profile from './assets/profile.jpeg';
 import Login from './views/Login';
-import ScheduleHome from './views/schedule/Home';
 import { authApi } from './api';
 import { Link } from 'react-router';
 

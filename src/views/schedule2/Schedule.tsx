@@ -15,50 +15,14 @@ const Schedule = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log('Fetching initial data from API...');
         const data = await initDataApi.get();
         setTasks(data.tasks || []);
         setScheduleRecords(data.scheduleRecords || []);
       } catch (error) {
         console.error('Failed to fetch initial data:', error);
         // 如果API请求失败，使用默认数据
-        setTasks([
-          {
-            type: 'progress',
-            id: '1',
-            themeColor: '#ffcc00',
-            title: 'Learning English',
-            progress: 10,
-            description: '《The You You Are》：跟读练习、总结出自己的思考并发布',
-            isCompleted: false,
-            startDate: '2025-08-24',
-            endDate: '',
-            repeatWeekdays: [1, 2, 3, 4, 5, 6], // 每周一至周六重复
-            startTime: '10:00', // 默认开始时间
-            endTime: '11:00'    // 默认结束时间
-          },
-          {
-            type: 'regular',
-            id: '2',
-            themeColor: '#00ccff',
-            title: '源码学习',
-            description: '阅读 React、Vue 等前端框架源码',
-            isCompleted: false,
-            startDate: '2025-08-24',
-            endDate: '',
-            repeatWeekdays: [6], // 每周六重复
-          },
-          {
-            type: 'recurring',
-            id: '3',
-            themeColor: '#51ff00',
-            title: '学习webgl',
-            description: '为了找工作，快速入门webgl',
-            isCompleted: false,
-            startDate: '2025-08-24',
-            endDate: '',
-            repeatWeekdays: [1, 2, 3, 4, 5, 6], // 每周一至周六重复
-          }
-        ]);
+        setTasks([]);
         setScheduleRecords([]);
       }
     };
@@ -92,14 +56,14 @@ const Schedule = () => {
       // 首先获取当前任务
       const currentTask = tasks.find(task => task.id === taskId);
       if (!currentTask) return;
-      
+
       const updatedTask = { ...currentTask, isCompleted: !currentTask.isCompleted };
-      
+
       await taskApi.update(taskId, updatedTask);
       setTasks(tasks.map(task =>
         task.id === taskId ? updatedTask : task
       ));
-      
+
       // 同时更新调度记录中的完成状态
       setScheduleRecords(scheduleRecords.map(record =>
         record.taskId === taskId ? { ...record, isCompleted: !record.isCompleted } : record
@@ -199,7 +163,13 @@ const Schedule = () => {
   return (
     <div style={{ height: '100vh', padding: 10, overflow: 'hidden' }}>
       {/* <h1>Schedule</h1> */}
-      <TaskList tasks={tasks} removeTask={removeTask} toggleTaskCompletion={toggleTaskCompletion} updateTask={updateTask} />
+      <TaskList
+        tasks={tasks}
+        removeTask={removeTask}
+        toggleTaskCompletion={toggleTaskCompletion}
+        updateTask={updateTask}
+        onAddTask={addTask}
+      />
       <Timeline tasks={tasks} scheduleRecords={scheduleRecords} updateTaskStatus={toggleTaskCompletion} onTaskDrop={onTaskDrop} deleteScheduleRecord={deleteScheduleRecord} />
     </div>
   );

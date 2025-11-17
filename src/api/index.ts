@@ -80,7 +80,7 @@ export const authApi = {
   logout: () => {
     localStorage.removeItem('token');
   },
-  register: (userData: { username: string; email: string; password: string }) => 
+  register: (userData: { username: string; email: string; password: string }) =>
     makeApiRequest('/api/users/', {
       method: 'POST',
       body: JSON.stringify(userData)
@@ -124,10 +124,11 @@ export const scheduleRecordApi = {
 export const initDataApi = {
   get: async () => {
     try {
-      const [tasks, scheduleRecords] = await Promise.all([
+      const [tasks, scheduleRecords = []] = await Promise.all([
         taskApi.getAll(),
-        scheduleRecordApi.getAll()
+        // scheduleRecordApi.getAll()
       ]);
+      console.log('Fetched initial data:', { tasks, scheduleRecords });
       return { tasks, scheduleRecords };
     } catch (error) {
       console.error('Failed to get initial data:', error);
@@ -155,7 +156,7 @@ export const journalApi = {
 
 // 社区相关API
 export const communityApi = {
-  getPosts: (skip: number = 0, limit: number = 20) => 
+  getPosts: (skip: number = 0, limit: number = 20) =>
     makeApiRequest(`/api/community/posts?skip=${skip}&limit=${limit}`),
   getPost: (id: number) => makeApiRequest(`/api/community/posts/${id}`),
   createPost: (post: any) => makeApiRequest('/api/community/posts', {
@@ -169,7 +170,7 @@ export const communityApi = {
   deletePost: (id: number) => makeApiRequest(`/api/community/posts/${id}`, {
     method: 'DELETE'
   }),
-  getComments: (postId: number, skip: number = 0, limit: number = 20) => 
+  getComments: (postId: number, skip: number = 0, limit: number = 20) =>
     makeApiRequest(`/api/community/posts/${postId}/comments?skip=${skip}&limit=${limit}`),
   createComment: (comment: any) => makeApiRequest('/api/community/comments', {
     method: 'POST',

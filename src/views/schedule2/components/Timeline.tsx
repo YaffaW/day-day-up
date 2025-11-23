@@ -1,11 +1,11 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import type { Task, ScheduleRecord } from '../types';
 import { getWeeklySchedule } from '../utils/scheduleUtils';
+import { scheduleApi } from '../../../api';
 import './Timeline.css'; // Assuming you have some CSS for styling
 
 interface TimelineProps {
   tasks: Task[];
-  scheduleRecords: ScheduleRecord[];
   updateTaskStatus: (taskId: string, completed: boolean) => void;
   onTaskDrop: (taskOrId: Task | string, newStartTime: string, newEndTime: string, date: string) => void;
   deleteScheduleRecord: (recordId: string) => void;
@@ -13,6 +13,9 @@ interface TimelineProps {
 
 const Timeline: React.FC<TimelineProps> = ({ tasks, scheduleRecords, updateTaskStatus, onTaskDrop, deleteScheduleRecord }) => {
   const [week, setWeek] = useState<'lastWeek' | 'thisWeek' | 'nextWeek'>('thisWeek');
+  const [backendScheduleRecords, setBackendScheduleRecords] = useState<any[]>([]); // 从后端获取的日程安排
+  const [loading, setLoading] = useState(false);
+  
 
   const now = new Date();
   const day = now.getDay(); // 0 (Sun) to 6 (Sat)
@@ -80,8 +83,31 @@ const Timeline: React.FC<TimelineProps> = ({ tasks, scheduleRecords, updateTaskS
     event.preventDefault();
   };
 
-  // 根据调度记录生成当周的任务安排
-  // 根据调度记录生成当周的任务安排
+  // 从后端获取当前周的日程安排
+  useEffect(() => {
+    const fetchScheduleData = async () => {
+      setLoading(true);
+      try {
+        const startDate = formatDateStr(dates[0]);
+        const endDate = formatDateStr(dates[6]);
+        
+        const response = await scheduleApi.getScheduleData({
+          startDate,
+          endDate
+        });
+        
+        setBackendScheduleRecords(response);
+      } catch (error) {
+        console.error('Failed to fetch schedule data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchScheduleData();
+  }, [dates]);
+
+  // 根据后端获取的调度记录生成当周的任务安排
   const weeklySchedule = useMemo(() => {
     const days: { date: Date; tasks: any[] }[] = [];
     
@@ -92,12 +118,13 @@ const Timeline: React.FC<TimelineProps> = ({ tasks, scheduleRecords, updateTaskS
       const date = new Date(dates[i]);
       const dateStr = date.toISOString().split('T')[0]; // YYYY-MM-DD format
       
-      // 获取该日期的调度记录
-      const dayScheduleRecords = scheduleRecords.filter(record => record.date === dateStr);
+      // 获取该日期的后端调度记录
+      const dayScheduleRecords = backendScheduleRecords.filter((record: any) => record.date === dateStr);
       
       // 将调度记录转换为任务显示格式
-      const dayTasksFromRecords = dayScheduleRecords.map(record => {
-        const task = tasks.find(t => t.id === record.taskId);
+      const dayTasksFromRecords = dayScheduleRecords.map((record: any) => {
+        // 如果调度记录有关联任务ID，查询对应任务信息
+        const task = tasks.find((t: Task) => t.id === record.taskId);
         if (task) {
           return {
             taskId: task.id,
@@ -110,109 +137,25 @@ const Timeline: React.FC<TimelineProps> = ({ tasks, scheduleRecords, updateTaskS
             description: task.description,
             taskType: task.type
           };
+        } else {
+          // 如果没有对应任务（如临时任务），使用调度记录中的信息
+          return {
+            taskId: record.taskId,
+            recordId: record.id,
+            title: record.title,
+            themeColor: record.themeColor,
+            startTime: record.startTime,
+            endTime: record.endTime,
+            isCompleted: record.isCompleted,
+            description: record.description,
+            taskType: 'regular' // 临时任务默认为regular类型
+          };
         }
-        return null;
-      }).filter(Boolean);
-      
-      // 处理有重复设置且有默认时间段的任务（按需生成）
-      const dayTasksFromRecurringWithTime = tasks
-        .filter(task => 
-          task.repeatWeekdays && 
-          task.repeatWeekdays.length > 0 && 
-          task.startTime && 
-          task.endTime
-        )
-        .filter(task => {
-          // 检查任务是否适用于该日期
-          if (task.startDate) {
-            const startDate = new Date(task.startDate);
-            if (date < startDate) {
-              return false;
-            }
-          }
-          
-          if (task.endDate) {
-            const endDate = new Date(task.endDate);
-            if (date > endDate) {
-              return false;
-            }
-          }
-          
-          // 检查是否在重复日中
-          const dayOfWeek = date.getDay(); // 0 (Sunday) to 6 (Saturday)
-          // 根据之前的代码约定，repeatWeekdays 中 1=周一, 2=周二, ..., 7=周日
-          const repeatDay = dayOfWeek === 0 ? 7 : dayOfWeek;
-          return task.repeatWeekdays?.includes(repeatDay) || false;
-        })
-        .map(task => ({
-          taskId: task.id,
-          recordId: `auto-${task.id}-${dateStr}`, // 为自动生成的记录创建唯一ID
-          title: task.title,
-          themeColor: task.themeColor,
-          startTime: task.startTime || '',
-          endTime: task.endTime || '',
-          isCompleted: task.isCompleted,
-          description: task.description,
-          taskType: task.type
-        }));
-      
-      // 收集没有默认时间段但有重复设置的任务
-      const recurringTaskWithoutTime = tasks
-        .filter(task =>
-          task.repeatWeekdays && 
-          task.repeatWeekdays.length > 0 && 
-          (!task.startTime || !task.endTime)
-        )
-        .filter(task => {
-          const dayOfWeek = date.getDay(); // 0 (Sunday) to 6 (Saturday)
-          const repeatDay = dayOfWeek === 0 ? 7 : dayOfWeek;
-          return task.repeatWeekdays?.includes(repeatDay) || false;
-        });
-      
-      // 合并来自调度记录和有默认时间的重复设置的任务
-      let allDayTasks = [...dayTasksFromRecords, ...dayTasksFromRecurringWithTime].filter(Boolean);
-      
-      // 为没有默认时间段的重复任务安排空闲时间段
-      if (recurringTaskWithoutTime.length > 0) {
-        // 检查当前日期的已占用时间段
-        const occupiedTimeSlots = allDayTasks.map(task => {
-          const startHour = parseInt(task.startTime.split(':')[0]);
-          const endHour = parseInt(task.endTime.split(':')[0]);
-          const slots = [];
-          for (let h = startHour; h < endHour; h++) {
-            slots.push(`${h}:00 - ${h + 1}:00`);
-          }
-          return slots;
-        }).flat();
-        
-        // 尝试将没有默认时间段的任务安排到空闲时间段中
-        recurringTaskWithoutTime.forEach(task => {
-          // 找到第一个空闲时间段
-          for (let slotIdx = 0; slotIdx < timeSlots.length; slotIdx++) {
-            const timeSlot = timeSlots[slotIdx];
-            if (!occupiedTimeSlots.includes(timeSlot)) {
-              // 找到空闲时间段，分配任务
-              allDayTasks.push({
-                taskId: task.id,
-                recordId: `auto-${task.id}-${dateStr}-${slotIdx}`,
-                title: task.title,
-                themeColor: task.themeColor,
-                startTime: timeSlot.split(' - ')[0],
-                endTime: timeSlot.split(' - ')[1],
-                isCompleted: task.isCompleted,
-                description: task.description,
-                taskType: task.type
-              });
-              occupiedTimeSlots.push(timeSlot); // 标记为已占用
-              break; // 分配一个时间段后跳出
-            }
-          }
-        });
-      }
+      });
       
       days.push({
         date,
-        tasks: allDayTasks as any[]
+        tasks: dayTasksFromRecords
       });
     }
     
@@ -220,7 +163,7 @@ const Timeline: React.FC<TimelineProps> = ({ tasks, scheduleRecords, updateTaskS
       week: dates[0],
       days
     };
-  }, [tasks, scheduleRecords, dates]);
+  }, [tasks, backendScheduleRecords, dates]);
 
   return (
     <div className="timeline-table-container">
@@ -240,7 +183,13 @@ const Timeline: React.FC<TimelineProps> = ({ tasks, scheduleRecords, updateTaskS
           </tr>
         </thead>
         <tbody>
-          {['一', '二', '三', '四', '五', '六', '日'].map((day, dayIdx) => {
+          {loading ? (
+            <tr>
+              <td colSpan={timeSlots.length + 1} style={{ textAlign: 'center', padding: '20px' }}>
+                Loading schedule...
+              </td>
+            </tr>
+          ) : ['一', '二', '三', '四', '五', '六', '日'].map((day, dayIdx) => {
             const dayTasks = weeklySchedule.days[dayIdx].tasks;
             
             return (
@@ -252,9 +201,24 @@ const Timeline: React.FC<TimelineProps> = ({ tasks, scheduleRecords, updateTaskS
                 {timeSlots.map((slot, slotIdx) => {
                   // 找到在此时间段内的调度任务
                   const task = dayTasks.find(t => {
-                    const taskStartHour = t.startTime ? parseInt(t.startTime.split(':')[0], 10) : -1;
-                    const taskEndHour = t.endTime ? parseInt(t.endTime.split(':')[0], 10) : -1;
-                    return taskStartHour <= 9 + slotIdx && taskEndHour > 9 + slotIdx;
+                    let startHour = 0;
+                    let endHour = 0;
+                    
+                    if (typeof t.startTime === 'string') {
+                      startHour = parseInt(t.startTime.split(':')[0], 10);
+                    } else if (t.startTime && typeof t.startTime === 'object') {
+                      // 如果是时间对象，需要转换为小时
+                      startHour = t.startTime.hour || t.startTime.hours || 0;
+                    }
+                    
+                    if (typeof t.endTime === 'string') {
+                      endHour = parseInt(t.endTime.split(':')[0], 10);
+                    } else if (t.endTime && typeof t.endTime === 'object') {
+                      // 如果是时间对象，需要转换为小时
+                      endHour = t.endTime.hour || t.endTime.hours || 0;
+                    }
+                    
+                    return startHour <= 9 + slotIdx && endHour > 9 + slotIdx;
                   });
                   
                   return (

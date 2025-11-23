@@ -124,17 +124,25 @@ export const scheduleRecordApi = {
 export const initDataApi = {
   get: async () => {
     try {
-      const [tasks, scheduleRecords = []] = await Promise.all([
+      const [tasks = [], scheduleRecords = []] = await Promise.all([
         taskApi.getAll(),
         // scheduleRecordApi.getAll()
       ]);
-      console.log('Fetched initial data:', { tasks, scheduleRecords });
       return { tasks, scheduleRecords };
     } catch (error) {
       console.error('Failed to get initial data:', error);
       throw error;
     }
   },
+};
+
+// 日程安排相关API - 用于获取特定日期范围内的日程数据
+export const scheduleApi = {
+  getScheduleData: (query: { startDate: string; endDate?: string }) => 
+    makeApiRequest('/api/schedule/', {
+      method: 'POST',
+      body: JSON.stringify(query)
+    }),
 };
 
 // 日记相关API

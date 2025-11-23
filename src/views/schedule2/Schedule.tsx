@@ -163,14 +163,14 @@ const Schedule = () => {
   return (
     <div style={{ height: '100vh', padding: 10, overflow: 'hidden' }}>
       {/* <h1>Schedule</h1> */}
-      <TaskList
-        tasks={tasks}
-        removeTask={removeTask}
-        toggleTaskCompletion={toggleTaskCompletion}
-        updateTask={updateTask}
-        onAddTask={addTask}
+      <TaskList 
+        tasks={tasks} 
+        removeTask={removeTask} 
+        toggleTaskCompletion={toggleTaskCompletion} 
+        updateTask={updateTask} 
+        onAddTask={addTask} 
       />
-      <Timeline tasks={tasks} scheduleRecords={scheduleRecords} updateTaskStatus={toggleTaskCompletion} onTaskDrop={onTaskDrop} deleteScheduleRecord={deleteScheduleRecord} />
+      <Timeline tasks={tasks} updateTaskStatus={toggleTaskCompletion} onTaskDrop={onTaskDrop} deleteScheduleRecord={deleteScheduleRecord} />
     </div>
   );
 };

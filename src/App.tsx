@@ -4,6 +4,7 @@ import profile from './assets/profile.jpeg';
 import Login from './views/Login';
 import { authApi } from './api';
 import { Link } from 'react-router';
+import Vocabulary from './views/vocabulary/Vocabulary';
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -38,7 +39,8 @@ function App() {
   const options = [
     { label: 'Schedule', URL: '/Schedule' },
     { label: 'Projects', URL: '/Projects' },
-    { label: 'Blog', URL: '/Blog' }
+    { label: 'Blog', URL: '/Blog' },
+    { label: 'Vocabulary', URL: '/Vocabulary' }
   ]
   return (
     <div className="app">
